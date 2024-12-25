@@ -108,3 +108,66 @@ proxmox_services:
 
 # File paths
 proxmox_js_path: "/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
+
+proxmox_iso_path: "/opt/data/template/iso"
+proxmox_iso_files:
+  # AlmaLinux ISOs
+  - name: "AlmaLinux-8.10-x86_64-dvd.iso"
+    url: "https://repo.almalinux.org/almalinux/8.10/isos/x86_64/AlmaLinux-8.10-x86_64-dvd.iso"
+  
+  - name: "AlmaLinux-9.4-x86_64-dvd.iso"
+    url: "https://repo.almalinux.org/almalinux/9.4/isos/x86_64/AlmaLinux-9.4-x86_64-dvd.iso"
+
+  # CentOS ISO
+  - name: "CentOS-Stream-9-latest-x86_64-dvd1.iso"
+    url: "https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-dvd1.iso"
+
+  # Debian ISOs
+  - name: "debian-10.10.0-amd64-DVD-1.iso"
+    url: "https://cdimage.debian.org/cdimage/archive/10.10.0/amd64/iso-dvd/debian-10.10.0-amd64-DVD-1.iso"
+
+  - name: "debian-11.11.0-amd64-DVD-1.iso"
+    url: "https://cdimage.debian.org/cdimage/archive/11.11.0/amd64/iso-dvd/debian-11.11.0-amd64-DVD-1.iso"
+
+  - name: "debian-12.7.0-amd64-DVD-1.iso"
+    url: "https://cdimage.debian.org/debian-cd/current/amd64/iso-dvd/debian-12.7.0-amd64-DVD-1.iso"
+
+  # pfSense ISO
+  - name: "netgate-installer-amd64.iso"
+    url: "https://download.netgate.com/pfsense-ce-plus/amd64/pfSense-CE-Plus-memstick-serial-23.09-RELEASE-amd64.img.gz"
+
+  # Rocky Linux ISOs
+  - name: "Rocky-8.10-x86_64-dvd1.iso"
+    url: "https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.10-x86_64-dvd1.iso"
+
+  - name: "Rocky-9.4-x86_64-dvd.iso"
+    url: "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.4-x86_64-dvd.iso"
+
+  # Ubuntu ISOs
+  - name: "ubuntu-18.04.3-server-amd64.iso"
+    url: "https://old-releases.ubuntu.com/releases/18.04.3/ubuntu-18.04.3-server-amd64.iso"
+
+  - name: "ubuntu-18.04.5-server-amd64.iso"
+    url: "https://old-releases.ubuntu.com/releases/18.04.5/ubuntu-18.04.5-server-amd64.iso"
+
+  - name: "ubuntu-18.04.6-live-server-amd64.iso"
+    url: "https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso"
+
+  - name: "ubuntu-20.04.6-live-server-amd64.iso"
+    url: "https://releases.ubuntu.com/20.04/ubuntu-20.04.6-live-server-amd64.iso"
+
+  - name: "ubuntu-22.04.5-live-server-amd64.iso"
+    url: "https://releases.ubuntu.com/22.04/ubuntu-22.04.5-live-server-amd64.iso"
+
+  - name: "ubuntu-24.04.1-live-server-amd64.iso"
+    url: "https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso"
+
+  # Windows ISOs
+  - name: "Win11_24H2_EnglishInternational_x64.iso"
+    url: "https://software-download.microsoft.com/download/sg/888969d5-f34g-4e03-ac9d-1f9786c69161/Win11_24H2_EnglishInternational_x64.iso"
+
+  - name: "WSVR2012_R2_9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO"
+    url: "https://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO"
+
+  - name: "WSVR2022_SERVER_EVAL_x64FRE_en-us.iso"
+    url: "https://go.microsoft.com/fwlink/p/?LinkID=2195280"

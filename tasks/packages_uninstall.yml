@@ -85,3 +85,6 @@
   ansible.builtin.apt:
     autoclean: true
     autoremove: true
+
+- name: Reboot after files removed
+  import_tasks: reboot.yml

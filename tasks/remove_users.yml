@@ -1,8 +1,11 @@
 ---
 
-- name: Create system users
+- name: Remove users
   ansible.builtin.user:
     name: "{{ item.name }}"
     system: yes
     state: "absent"
   loop: "{{ proxmox_users }}"
+  when: 
+    - item.name != 'root'
+    - item.name != 'ansible'

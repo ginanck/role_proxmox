@@ -6,8 +6,5 @@
 - name: Remove Packages
   import_tasks: packages_uninstall.yml
 
-- name: Reboot after files removed
-  import_tasks: reboot.yml
-
-- name: Remove Files
-  import_tasks: remove_files.yml
+- name: Remove Service
+  import_tasks: remove_service.yml

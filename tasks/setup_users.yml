@@ -1,15 +1,18 @@
 ---
 
-- name: Create system users
+- name: Create users
   ansible.builtin.user:
     name: "{{ item.name }}"
     password: "{{ item.password | password_hash('sha512') if item.password is defined else omit }}"
     comment: "{{ item.comment | default(omit) }}"
     shell: "{{ '/bin/bash' if item.ssh_allowed | default(true) else '/sbin/nologin' }}"
-    system: yes
+    system: false
     state: "{{ item.state | default('present') }}"
     create_home: "{{ item.ssh_allowed | default(true) }}"
   loop: "{{ proxmox_users }}"
+  when: 
+    - item.name != 'root'
+    - item.name != 'ansible'
   no_log: true
 
 - name: Configure Proxmox Users

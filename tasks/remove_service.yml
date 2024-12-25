@@ -38,3 +38,6 @@
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: yes
+
+- name: Reboot after files removed
+  import_tasks: reboot.yml

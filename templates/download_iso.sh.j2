@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# List of URLs
+urls=(
+{% for iso in proxmox_iso_files %}
+    "{{ iso.url }}"
+{% endfor %}
+)
+
+# Download each ISO
+for url in "${urls[@]}"; do
+    curl -C - -L -O "$url"
+done
