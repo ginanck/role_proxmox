@@ -7,12 +7,12 @@
 
 - name: Generate ISO download script
   ansible.builtin.template:
-    src: download_iso.sh.j2
-    dest: "{{ proxmox_iso_path }}/download_iso.sh"
+    src: download.sh.j2
+    dest: "{{ proxmox_iso_path }}/download.sh"
     mode: '0755'
 
 - name: Start download script in screen session
   ansible.builtin.shell: |
-    screen -dmS iso_download bash -c "{{ proxmox_iso_path }}/download_iso.sh"
+    screen -dmS iso_download bash -c "{{ proxmox_iso_path }}/download.sh"
   args:
     executable: /bin/bash

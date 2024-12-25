@@ -16,8 +16,5 @@
 - name: Get API Tokens
   import_tasks: setup_tokens.yml
 
-- name: Reboot after installation
-  import_tasks: reboot.yml
-
 - name: Download ISO Files
-  import_tasks: download_iso.yml
+  import_tasks: download.yml

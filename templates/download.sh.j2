@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# Configuration
+TARGET_DIR="{{ proxmox_iso_path }}"
+LOG_DIR="${TARGET_DIR}/logs"
+LOG_FILE="${LOG_DIR}/download_$(date +%Y%m%d_%H%M%S).log"
+TEMP_DIR="${TARGET_DIR}/temp"
+
+# Create necessary directories
+mkdir -p "${LOG_DIR}" "${TEMP_DIR}"
+
+# Set temporary directory for downloads
+export TMPDIR="${TEMP_DIR}"
+
+# Unified logging function
+log() {
+    local severity="$1"
+    local message="$2"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    printf "[%-8s] [%-19s] %s\n" "${severity}" "${timestamp}" "${message}" | tee -a "$LOG_FILE"
+}
+
+# DNS resolution check function
+check_dns() {
+    local domain="$1"
+    local retries=3
+    local retry_count=0
+    
+    while [ $retry_count -lt $retries ]; do
+        if nslookup "$domain" >/dev/null 2>&1; then
+            return 0
+        fi
+        ((retry_count++))
+        log "WARNING" "DNS resolution failed for $domain (attempt $retry_count/$retries)"
+        sleep 5
+    done
+    
+    log "ERROR" "DNS resolution failed permanently for $domain after $retries attempts"
+    return 1
+}
+
+# Download function
+download_iso() {
+    local url="$1"
+    local filename=$(basename "$url")
+    local target_file="${TARGET_DIR}/${filename}"
+    local current_item="$2"
+    local total_items="$3"
+
+    # Extract domain from URL
+    local domain=$(echo "$url" | awk -F/ '{print $3}')
+    
+    log "PROGRESS" "Processing item ${current_item}/${total_items}"
+    log "INFO" "Starting download: ${filename}"
+    log "INFO" "URL: ${url}"
+
+    # Check DNS resolution first
+    if ! check_dns "$domain"; then
+        log "SKIP" "Skipping download due to DNS resolution failure: ${filename}"
+        return 1
+    fi
+
+    # Check if file exists and verify if it's complete
+    if [ -f "${target_file}" ]; then
+        local remote_size=$(curl -sI "$url" | grep -i content-length | awk '{print $2}' | tr -d '\r')
+        local local_size=$(stat -f%z "${target_file}" 2>/dev/null || stat -c%s "${target_file}")
+        
+        if [ "$remote_size" = "$local_size" ]; then
+            log "SKIP" "File already completely downloaded: ${filename}"
+            return 0
+        else
+            log "RESUME" "Partial file found, resuming download: ${filename}"
+        fi
+    fi
+
+    if curl -C - -L --fail \
+         --connect-timeout 60 \
+         --max-time 3600 \
+         --retry 3 \
+         --retry-delay 60 \
+         -o "${target_file}" \
+         "${url}"; then
+        log "SUCCESS" "Downloaded successfully: ${filename}"
+        return 0
+    else
+        log "ERROR" "Failed to download: ${filename}"
+        return 1
+    fi
+}
+
+# Main execution
+cd "${TARGET_DIR}"
+log "INFO" "Starting download session in ${TARGET_DIR}"
+log "INFO" "Temporary directory set to ${TEMP_DIR}"
+
+# URLs to download
+urls=(
+{% for iso in proxmox_iso_files %}
+    "{{ iso }}"
+{% endfor %}
+)
+
+{% raw %}
+# Download counter
+total_urls=${#urls[@]}
+successful=0
+failed=0
+current=0
+{% endraw %}
+
+log "INFO" "Total files to download: ${total_urls}"
+
+# Process downloads
+for url in "${urls[@]}"; do
+    ((current++))
+    if download_iso "$url" "$current" "$total_urls"; then
+        ((successful++))
+        log "PROGRESS" "Progress: ${current}/${total_urls} completed"
+    else
+        ((failed++))
+        log "PROGRESS" "Progress: ${current}/${total_urls} completed (with errors)"
+    fi
+done
+
+# Final summary
+log "COMPLETED" "Download session completed"
+log "SUMMARY" "Total files processed: ${total_urls}"
+log "SUMMARY" "Successfully downloaded: ${successful}"
+log "SUMMARY" "Failed downloads: ${failed}"
+
+# Cleanup
+if [ -d "${TEMP_DIR}" ]; then
+    rm -rf "${TEMP_DIR}"
+fi
