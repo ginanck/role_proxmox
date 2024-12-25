@@ -1,0 +1,40 @@
+---
+
+- name: Ensure PVE filesystem is unmounted
+  ansible.builtin.mount:
+    path: /etc/pve
+    state: unmounted
+
+- name: Remove Proxmox configuration directory
+  ansible.builtin.file:
+    path: /etc/pve
+    state: absent
+    force: yes
+
+- name: Remove recovery files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/var/lib/pve-cluster/"
+    - "/var/lib/pve-firewall/"
+    - "/var/lib/pve-manager/"
+    - "/var/lib/vz/"
+
+- name: Remove Proxmox systemd files
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}"
+    state: absent
+  loop:
+    - pve-cluster.service
+    - pvedaemon.service
+    - pveproxy.service
+    - pvestatd.service
+    - pvescheduler.service
+    - pve-ha-lrm.service
+    - pve-ha-crm.service
+    - pve-firewall.service
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes

@@ -1,0 +1,87 @@
+---
+
+- name: Remove enterprise repository before installing default kernel
+  ansible.builtin.apt_repository:
+    repo: "deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise"
+    state: absent
+    filename: pve-enterprise
+
+- name: Install default Debian kernel and ensure bootloader
+  ansible.builtin.apt:
+    name:
+      - linux-image-amd64
+      - linux-headers-amd64
+    state: present
+    update_cache: true
+
+- name: Stop Proxmox services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - pve-cluster
+    - pvedaemon
+    - pveproxy
+    - pvestatd
+    - pvescheduler
+    - pve-ha-lrm
+    - pve-ha-crm
+    - pve-firewall
+
+- name: Create file to allow Proxmox VE removal
+  ansible.builtin.file:
+    path: /please-remove-proxmox-ve
+    state: touch
+    mode: '0644'
+
+- name: Purge Proxmox VE meta-package
+  ansible.builtin.apt:
+    name: proxmox-ve
+    state: absent
+    purge: yes
+
+- name: Remove Proxmox VE packages
+  ansible.builtin.apt:
+    name:
+      - proxmox-archive-keyring
+      - proxmox-backup-client
+      - proxmox-backup-file-restore
+      - proxmox-mail-forward
+      - proxmox-mini-journalreader
+      - proxmox-termproxy
+      - proxmox-ve
+      - proxmox-websocket-tunnel
+      - proxmox-widget-toolkit
+      - pve-cluster
+      - pve-container
+      - pve-docs
+      - pve-edk2-firmware*
+      - pve-firewall
+      - pve-firmware
+      - pve-ha-manager
+      - pve-i18n
+      - pve-lxc-syscalld
+      - pve-manager
+      - pve-qemu-kvm
+      - pve-xtermjs
+    state: absent
+
+- name: Remove APT keys
+  ansible.builtin.apt_key:
+    url: "{{ item.url }}"
+    state: absent
+    validate_certs: false
+  loop: "{{ proxmox_apt_keys }}"
+
+- name: Remove APT repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item.repo }}"
+    filename: "{{ item.filename }}"
+    state: absent
+    validate_certs: false
+  loop: "{{ proxmox_repositories }}"
+
+- name: Clean apt cache
+  ansible.builtin.apt:
+    autoclean: true
+    autoremove: true

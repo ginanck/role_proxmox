@@ -1,0 +1,55 @@
+---
+
+- name: Update APT keys
+  ansible.builtin.apt_key:
+    url: "{{ item.url }}"
+    state: "{{ item.state }}"
+    validate_certs: false
+  loop: "{{ proxmox_apt_keys }}"
+
+- name: Update APT repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item.repo }}"
+    filename: "{{ item.filename }}"
+    state: "{{ item.state }}"
+    validate_certs: false
+  loop: "{{ proxmox_repositories }}"
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install required dependencies
+  ansible.builtin.apt:
+    name: "{{ proxmox_dependencies }}"
+    state: present
+
+- name: Install Proxmox VE packages
+  ansible.builtin.apt:
+    name: "{{ proxmox_packages }}"
+    state: present
+    update_cache: yes
+
+- name: Remove os-prober package
+  ansible.builtin.apt:
+    name: os-prober
+    state: absent
+
+- name: Remove subscription notice
+  ansible.builtin.replace:
+    path: "{{ proxmox_js_path }}"
+    regexp: "data.status !== 'Active'"
+    replace: "false"
+
+- name: Enable required services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  loop: "{{ proxmox_services }}"
+
+- name: Wait for Proxmox Web to become available
+  ansible.builtin.wait_for:
+    port: 8006
+    delay: 10
+    timeout: 300

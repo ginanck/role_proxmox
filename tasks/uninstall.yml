@@ -1,0 +1,13 @@
+---
+
+- name: Remove Users
+  import_tasks: remove_users.yml
+
+- name: Remove Packages
+  import_tasks: packages_uninstall.yml
+
+- name: Reboot after files removed
+  import_tasks: reboot.yml
+
+- name: Remove Files
+  import_tasks: remove_files.yml

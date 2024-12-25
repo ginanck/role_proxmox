@@ -1,0 +1,110 @@
+---
+# defaults file for role_proxmox
+
+proxmox_state: "present"
+
+proxmox_users:
+  - name: root
+    enabled: false
+    ssh_allowed: false
+
+  - name: pveadmin
+    email: pveadmin@example.com
+    comment: System Administrator User
+    password: "{{ pveadmin_pass }}"
+    groups: ['administrators']
+    enabled: true
+    ssh_allowed: true
+
+  - name: terraform
+    email: terraform@example.com
+    comment: terraform User
+    groups: ['api_access']
+    enabled: true
+    ssh_allowed: false
+    tokens:
+      - name: terraform-token
+        privsep: true
+        permissions:
+          - path: /
+            roles: ['PVEAdmin']
+
+  - name: packer
+    email: packer@example.com
+    comment: packer User
+    groups: ['api_access']
+    enabled: true
+    ssh_allowed: false
+    tokens:
+      - name: packer-token
+        privsep: true
+        permissions:
+          - path: /
+            roles: ['PVEVMAdmin']
+
+  - name: gkorkmaz
+    email: gkorkmaz@example.com
+    comment: System Administrator User
+    password: "{{ pveadmin_pass }}"
+    permissions:
+      - path: '/'
+        roles: ['Administrator']
+    enabled: true
+    ssh_allowed: true
+
+proxmox_groups:
+  - name: administrators
+    comment: System Administrator Group
+    permissions:
+      - path: /
+        roles: ['Administrator']
+    state: present
+
+  - name: api_access
+    comment: Pool Admin
+    permissions:
+      - path: /
+        roles: ['PVEAdmin']
+    state: present
+
+# Storage Variables
+proxmox_storage:
+  - name: data
+    path: /opt/data
+    content: ['rootdir', 'iso', 'images']
+    state: present
+
+# Repository keys to add
+proxmox_apt_keys:
+  - url: "https://download.proxmox.com/debian/proxmox-release-bookworm.gpg"
+    state: present
+
+# Repositories to manage
+proxmox_repositories:
+  - repo: "deb [arch=amd64] http://download.proxmox.com/debian/pve bookworm pve-no-subscription"
+    filename: "proxmox-community"
+    state: present
+  - repo: "deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise"
+    filename: "pve-enterprise"
+    state: absent
+
+# Package lists
+proxmox_dependencies:
+  - sudo
+  - openssh-server
+  - postfix
+  - open-iscsi
+
+proxmox_packages:
+  - proxmox-ve
+  - pve-kernel-6.2
+
+# Services to enable
+proxmox_services:
+  - pve-cluster
+  - pvedaemon
+  - pveproxy
+  - pvestatd
+
+# File paths
+proxmox_js_path: "/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"

@@ -1,0 +1,8 @@
+---
+
+- name: Create system users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    system: yes
+    state: "absent"
+  loop: "{{ proxmox_users }}"

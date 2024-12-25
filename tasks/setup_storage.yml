@@ -1,0 +1,20 @@
+---
+
+- name: Configure Proxmox Storage
+  pve_configure_storage:
+    desired_storage: "{{ proxmox_storage }}"
+  register: storage_result
+
+- name: Display storage configuration results
+  debug:
+    msg: |
+      Storage '{{ item.command_type }}': {{ item.status }}
+      {% if item.command is defined %}
+      Command executed:
+        {{ item.command }}
+      {% endif %}
+      {% if item.error is defined %}
+      Error:
+        {{ item.error }}
+      {% endif %}
+  loop: "{{ storage_result.results }}"

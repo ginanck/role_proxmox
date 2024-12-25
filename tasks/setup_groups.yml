@@ -1,0 +1,20 @@
+---
+
+- name: Configure Proxmox Groups
+  pve_configure_groups:
+    desired_groups: "{{ proxmox_groups }}"
+  register: groups_result
+
+- name: Display groups configuration results
+  debug:
+    msg: |
+      Group '{{ item.command_type }}': {{ item.status }}
+      {% if item.command is defined %}
+      Command executed:
+        {{ item.command }}
+      {% endif %}
+      {% if item.error is defined %}
+      Error:
+        {{ item.error }}
+      {% endif %}
+  loop: "{{ groups_result.results }}"

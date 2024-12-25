@@ -1,0 +1,12 @@
+---
+- name: Retrieve API tokens
+  pve_get_tokens:
+  register: token_result
+
+- name: Display API tokens
+  debug:
+    msg: |
+      User: {{ item.user }}
+      Token Name: {{ item.token_name }}
+      Token Value: {{ item.token_value }}
+  loop: "{{ token_result.tokens }}"

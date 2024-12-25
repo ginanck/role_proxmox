@@ -1,0 +1,6 @@
+---
+
+- name: Reboot system
+  ansible.builtin.reboot:
+    msg: "Rebooting after Proxmox VE removal"
+    reboot_timeout: 600

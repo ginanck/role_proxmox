@@ -1,0 +1,12 @@
+---
+# tasks file for role_proxmox
+
+- name: Install Proxmox VE
+  ansible.builtin.include_tasks: install.yml
+  when: proxmox_state == "present"
+  tags: ['install']
+
+- name: Uninstall Proxmox VE
+  ansible.builtin.include_tasks: uninstall.yml
+  when: proxmox_state == "absent"
+  tags: ['uninstall']

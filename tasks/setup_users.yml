@@ -1,0 +1,32 @@
+---
+
+- name: Create system users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | password_hash('sha512') if item.password is defined else omit }}"
+    comment: "{{ item.comment | default(omit) }}"
+    shell: "{{ '/bin/bash' if item.ssh_allowed | default(true) else '/sbin/nologin' }}"
+    system: yes
+    state: "{{ item.state | default('present') }}"
+    create_home: "{{ item.ssh_allowed | default(true) }}"
+  loop: "{{ proxmox_users }}"
+  no_log: true
+
+- name: Configure Proxmox Users
+  pve_configure_users:
+    desired_users: "{{ proxmox_users }}"
+  register: users_result
+
+- name: Display user configuration results
+  debug:
+    msg: |
+      User '{{ item.name }}': {{ item.status }}
+      {% if item.details is defined %}
+      Details:
+        {{ item.details | regex_replace('password: .*', 'password: *****') }}
+      {% endif %}
+      {% if item.changes is defined %}
+      Changes:
+        {{ item.changes | to_nice_yaml(indent=2) | regex_replace('password: .*', 'password: *****') }}
+      {% endif %}
+  loop: "{{ users_result.results }}"
