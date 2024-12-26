@@ -49,3 +49,6 @@
   ansible.builtin.file:
     path: /tmp/new_interfaces
     state: absent
+
+- name: Reboot after files network configurations
+  import_tasks: reboot.yml

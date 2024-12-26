@@ -53,3 +53,6 @@
     port: 8006
     delay: 10
     timeout: 300
+
+- name: Reboot after files installation
+  import_tasks: reboot.yml
