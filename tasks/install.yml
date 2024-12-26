@@ -11,31 +11,31 @@
     - setup
 
 - name: Install Proxmox Packages
-  import_tasks: packages_install.yml
+  include_tasks: packages_install.yml
   tags: 
     - packages
     - setup
 
 - name: Configure PVE Groups
-  import_tasks: setup_groups.yml
+  include_tasks: setup_groups.yml
   tags:
     - groups
     - setup
 
 - name: Configure PVE and System Users
-  import_tasks: setup_users.yml
+  include_tasks: setup_users.yml
   tags:
     - users
     - setup
 
 - name: Configure storage
-  import_tasks: setup_storage.yml
+  include_tasks: setup_storage.yml
   tags:
     - storage
     - setup
 
 - name: Get API Tokens
-  import_tasks: setup_tokens.yml
+  include_tasks: setup_tokens.yml
   tags:
     - tokens
     - setup
@@ -47,7 +47,7 @@
     - setup
 
 - name: Download ISO Files
-  import_tasks: download.yml
+  include_tasks: download.yml
   tags: 
     - iso
     - never
