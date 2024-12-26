@@ -69,7 +69,7 @@ proxmox_users:
         privsep: true
         permissions:
           - path: /
-            roles: ['PVEVMAdmin']
+            roles: ['PVEAdmin']
 
   - name: gkorkmaz
     email: gkorkmaz@example.com
