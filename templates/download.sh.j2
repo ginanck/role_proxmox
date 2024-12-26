@@ -42,10 +42,10 @@ check_dns() {
 # Download function
 download_iso() {
     local url="$1"
-    local filename=$(basename "$url")
+    local filename="$2"
     local target_file="${TARGET_DIR}/${filename}"
-    local current_item="$2"
-    local total_items="$3"
+    local current_item="$3"
+    local total_items="$4"
 
     # Extract domain from URL
     local domain=$(echo "$url" | awk -F/ '{print $3}')
@@ -93,38 +93,35 @@ cd "${TARGET_DIR}"
 log "INFO" "Starting download session in ${TARGET_DIR}"
 log "INFO" "Temporary directory set to ${TEMP_DIR}"
 
-# URLs to download
-urls=(
+# Define file list
+declare -A files=(
 {% for iso in proxmox_iso_files %}
-    "{{ iso }}"
+    ["{{ iso.name }}"]="{{ iso.url }}"
 {% endfor %}
 )
 
 {% raw %}
 # Download counter
-total_urls=${#urls[@]}
+total_items=${#files[@]}
+current=0
 successful=0
 failed=0
-current=0
 {% endraw %}
 
-log "INFO" "Total files to download: ${total_urls}"
-
-# Process downloads
-for url in "${urls[@]}"; do
+for filename in "${!files[@]}"; do
     ((current++))
-    if download_iso "$url" "$current" "$total_urls"; then
+    if download_iso "${files[$filename]}" "$filename" "$current" "$total_items"; then
         ((successful++))
-        log "PROGRESS" "Progress: ${current}/${total_urls} completed"
+        log "PROGRESS" "Progress: ${current}/${total_items} completed"
     else
         ((failed++))
-        log "PROGRESS" "Progress: ${current}/${total_urls} completed (with errors)"
+        log "PROGRESS" "Progress: ${current}/${total_items} completed (with errors)"
     fi
 done
 
 # Final summary
 log "COMPLETED" "Download session completed"
-log "SUMMARY" "Total files processed: ${total_urls}"
+log "SUMMARY" "Total files processed: ${total_items}"
 log "SUMMARY" "Successfully downloaded: ${successful}"
 log "SUMMARY" "Failed downloads: ${failed}"
 
