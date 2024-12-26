@@ -50,4 +50,4 @@
   include_tasks: download.yml
   tags: 
     - iso
-    - never
+    - setup
