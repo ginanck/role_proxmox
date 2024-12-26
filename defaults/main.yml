@@ -26,8 +26,11 @@ proxmox_network_interfaces:
         address: "2a01:4f9:3051:3ae9::2/64"
         gateway: "fe80::1"
     - name: "vmbr1"
-      vlan_aware: true
-      vids: 10
+      vlan_aware: false
+    - name: "vmbr2"
+      vlan_aware: false
+    - name: "vmbr3"
+      vlan_aware: false
 
 proxmox_users:
   - name: root
