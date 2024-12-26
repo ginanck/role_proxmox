@@ -3,6 +3,32 @@
 
 proxmox_state: "present"
 
+proxmox_lvm_disks:
+  - name: /dev/nvme1n1
+    vg: vg0
+    volumes:
+      - name: data
+        size: 930G
+        path: /opt/data
+
+proxmox_network_interfaces:
+  primary_interface: "enp41s0"
+  interfaces:
+    - name: "vmbr0"
+      is_primary: true
+      comment: "route 65.109.108.128/26 via 65.109.108.129"
+      ipv4:
+        address: "65.109.108.167/26"
+        gateway: "65.109.108.129"
+        network: "65.109.108.128"
+        netmask: "255.255.255.192"
+      ipv6:
+        address: "2a01:4f9:3051:3ae9::2/64"
+        gateway: "fe80::1"
+    - name: "vmbr1"
+      vlan_aware: true
+      vids: 10
+
 proxmox_users:
   - name: root
     enabled: false

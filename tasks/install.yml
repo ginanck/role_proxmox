@@ -1,20 +1,53 @@
 ---
 # tasks file for role_proxmox
 
+- name: Setup LVM Disk
+  with_items: "{{ proxmox_lvm_disks }}"
+  loop_control:
+    loop_var: disk
+  include_tasks: setup_storage_lvm.yml
+  tags: 
+    - lvm
+    - setup
+
 - name: Install Proxmox Packages
   import_tasks: packages_install.yml
+  tags: 
+    - packages
+    - setup
 
 - name: Configure PVE Groups
   import_tasks: setup_groups.yml
+  tags:
+    - groups
+    - setup
 
 - name: Configure PVE and System Users
   import_tasks: setup_users.yml
+  tags:
+    - users
+    - setup
 
 - name: Configure storage
   import_tasks: setup_storage.yml
+  tags:
+    - storage
+    - setup
 
 - name: Get API Tokens
   import_tasks: setup_tokens.yml
+  tags:
+    - tokens
+    - setup
+
+- name: Configure network interfaces
+  include_tasks: setup_network.yml
+  tags: 
+    - network
+    - setup
 
 - name: Download ISO Files
   import_tasks: download.yml
+  tags: 
+    - iso
+    - never

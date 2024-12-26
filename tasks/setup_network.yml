@@ -1,0 +1,51 @@
+---
+
+- name: Verify only one primary bridge interface exists
+  assert:
+    that:
+      - proxmox_network_interfaces.interfaces | selectattr('is_primary', 'defined') | list | length == 1
+      - proxmox_network_interfaces.interfaces | selectattr('is_primary', 'defined') | first == proxmox_network_interfaces.interfaces | first
+    fail_msg: "Exactly one bridge must be marked as primary and it must be the first in the list"
+
+- name: Generate new interfaces configuration
+  ansible.builtin.template:
+    src: templates/interfaces.j2
+    dest: /tmp/new_interfaces
+    mode: '0644'
+
+- name: Compare current and new interface configurations
+  ansible.builtin.command: diff /etc/network/interfaces /tmp/new_interfaces
+  register: diff_result
+  failed_when: false
+  changed_when: diff_result.rc == 1
+
+- name: Apply new interface configuration if different
+  ansible.builtin.copy:
+    src: /tmp/new_interfaces
+    dest: /etc/network/interfaces
+    backup: yes
+    mode: '0644'
+    remote_src: yes
+  when: diff_result.rc == 1
+
+- name: Clean up temporary file
+  ansible.builtin.file:
+    path: /tmp/new_interfaces
+    state: absent
+
+- name: restart networking
+  ansible.builtin.service:
+    name: networking
+    state: restarted
+  async: 30
+  poll: 0
+
+- name: wait for connection
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 60
+
+- name: Clean up temporary file
+  ansible.builtin.file:
+    path: /tmp/new_interfaces
+    state: absent

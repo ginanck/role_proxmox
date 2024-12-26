@@ -1,0 +1,43 @@
+---
+
+- name: Get current PV information
+  ansible.builtin.command: pvs --noheadings --options pv_name,vg_name
+  register: current_pvs
+  changed_when: false
+
+- name: Create a Volume Group
+  community.general.lvg:
+    vg: "{{ disk.vg }}"
+    pvs: "{{ disk.name }}"
+  when: 
+    - disk.name not in current_pvs.stdout
+    - disk.vg not in ansible_lvm.vgs
+
+- name: Create a Logical Volume
+  community.general.lvol:
+    vg: "{{ disk.vg }}"
+    lv: "{{ item.name }}"
+    size: "{{ item.size }}"
+    resizefs: yes
+  loop: "{{ disk.volumes }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Make Filesystem
+  community.general.filesystem:
+    fstype: xfs
+    dev: /dev/{{ disk.vg }}/{{ item.name }}
+  loop: "{{ disk.volumes }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Mount Filesystem
+  ansible.posix.mount:
+    src: /dev/{{ disk.vg }}/{{ item.name }}
+    path: "{{ item.path }}"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+  loop: "{{ disk.volumes }}"
+  loop_control:
+    label: "{{ item.path }}"
