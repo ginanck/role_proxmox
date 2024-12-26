@@ -4,7 +4,7 @@
 proxmox_state: "present"
 
 proxmox_lvm_disks:
-  - name: /dev/nvme1n1
+  - name: "/dev/nvme1n1,/dev/nvme0n1p2"
     vg: vg0
     volumes:
       - name: data

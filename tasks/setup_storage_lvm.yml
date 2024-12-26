@@ -1,17 +1,15 @@
 ---
-
 - name: Get current PV information
   ansible.builtin.command: pvs --noheadings --options pv_name,vg_name
   register: current_pvs
   changed_when: false
 
-- name: Create a Volume Group
+- name: Create or extend Volume Group
   community.general.lvg:
     vg: "{{ disk.vg }}"
     pvs: "{{ disk.name }}"
-  when: 
-    - disk.name not in current_pvs.stdout
-    - disk.vg not in ansible_lvm.vgs
+    state: present
+  when: disk.name not in current_pvs.stdout
 
 - name: Create a Logical Volume
   community.general.lvol:
@@ -19,6 +17,7 @@
     lv: "{{ item.name }}"
     size: "{{ item.size }}"
     resizefs: yes
+    force: yes
   loop: "{{ disk.volumes }}"
   loop_control:
     label: "{{ item.name }}"
