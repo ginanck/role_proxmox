@@ -2,6 +2,7 @@
 
 - name: Remove Users
   import_tasks: remove_users.yml
+  when: proxmox_users is defined
 
 - name: Remove Packages
   import_tasks: packages_uninstall.yml

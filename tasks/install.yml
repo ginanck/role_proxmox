@@ -1,53 +1,38 @@
 ---
 # tasks file for role_proxmox
 
+- name: Install Proxmox Packages
+  include_tasks: packages_install.yml
+
+- name: Configure PVE Groups
+  include_tasks: setup_groups.yml
+  when: proxmox_groups is defined
+
+- name: Configure PVE and System Users
+  include_tasks: setup_users.yml
+  when: proxmox_users is defined
+
 - name: Setup LVM Disk
   with_items: "{{ proxmox_lvm_disks }}"
   loop_control:
     loop_var: disk
   include_tasks: setup_storage_lvm.yml
-  tags: 
-    - lvm
-    - setup
-
-- name: Install Proxmox Packages
-  include_tasks: packages_install.yml
-  tags: 
-    - packages
-    - setup
-
-- name: Configure PVE Groups
-  include_tasks: setup_groups.yml
-  tags:
-    - groups
-    - setup
-
-- name: Configure PVE and System Users
-  include_tasks: setup_users.yml
-  tags:
-    - users
-    - setup
+  when: proxmox_lvm_disks is defined
 
 - name: Configure storage
   include_tasks: setup_storage.yml
-  tags:
-    - storage
-    - setup
-
-- name: Get API Tokens
-  include_tasks: setup_tokens.yml
-  tags:
-    - tokens
-    - setup
+  when: proxmox_storage is defined
 
 - name: Configure network interfaces
   include_tasks: setup_network.yml
-  tags: 
-    - network
-    - setup
+  when: proxmox_network_interfaces is defined
+
+- name: Get API Tokens
+  include_tasks: setup_tokens.yml
+  when: proxmox_users is defined
 
 - name: Download ISO Files
   include_tasks: download.yml
-  tags: 
-    - iso
-    - setup
+  when:
+    - proxmox_iso_path is defined
+    - proxmox_iso_files is defined
