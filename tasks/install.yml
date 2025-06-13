@@ -12,13 +12,6 @@
   include_tasks: setup_users.yml
   when: proxmox_users is defined
 
-- name: Setup LVM Disk
-  with_items: "{{ proxmox_lvm_disks }}"
-  loop_control:
-    loop_var: disk
-  include_tasks: setup_storage_lvm.yml
-  when: proxmox_lvm_disks is defined
-
 - name: Configure storage
   include_tasks: setup_storage.yml
   when: proxmox_storage is defined
