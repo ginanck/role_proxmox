@@ -3,14 +3,6 @@
 
 proxmox_state: "present"
 
-proxmox_lvm_disks:
-  - name: "/dev/nvme1n1,/dev/nvme0n1p2"
-    vg: vg0
-    volumes:
-      - name: data
-        size: 930G
-        path: /opt/data
-
 proxmox_network_interfaces:
   primary_interface: "enp41s0"
   interfaces:
