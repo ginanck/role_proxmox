@@ -1,45 +1,77 @@
 ---
 
-- name: Update APT keys
-  ansible.builtin.apt_key:
-    url: "{{ item.url }}"
-    state: "{{ item.state }}"
-    validate_certs: false
-  loop: "{{ proxmox_apt_keys }}"
-
-- name: Update APT repositories
-  ansible.builtin.apt_repository:
-    repo: "{{ item.repo }}"
-    filename: "{{ item.filename }}"
-    state: "{{ item.state }}"
-    validate_certs: false
-  loop: "{{ proxmox_repositories }}"
-
-- name: Update apt cache
-  ansible.builtin.apt:
-    update_cache: yes
-
 - name: Install required dependencies
   ansible.builtin.apt:
     name: "{{ proxmox_dependencies }}"
     state: present
 
+- name: Add APT keys
+  ansible.builtin.apt_key:
+    url: "{{ proxmox_apt_keys.url }}"
+    state: "{{ proxmox_apt_keys.state }}"
+    keyring: /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+    validate_certs: false
+
+- name: Add Proxmox repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ proxmox_repositories.repo }}"
+    filename: "{{ proxmox_repositories.filename }}"
+    state: "{{ proxmox_repositories.state }}"
+    validate_certs: false
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Upgrade all packages
+  ansible.builtin.apt:
+    upgrade: full
+    autoremove: yes
+
+- name: Install Proxmox default kernel
+  ansible.builtin.apt:
+    name: "{{ proxmox_packages.kernel }}"
+    state: present
+
+- name: Reboot after default kernel installation
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+    msg: "Rebooting the system to apply the new kernel..."
+
+- name: Wait for Proxmox Web to become available
+  ansible.builtin.wait_for:
+    port: 22
+    delay: 30
+    timeout: 300
+
 - name: Install Proxmox VE packages
   ansible.builtin.apt:
-    name: "{{ proxmox_packages }}"
+    name: "{{ proxmox_packages.proxmox }}"
     state: present
-    update_cache: yes
+
+- name: Remove Proxmox Enterprise repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ proxmox_enterprise_repositories.repo }}"
+    filename: "{{ proxmox_enterprise_repositories.filename }}"
+    state: "{{ proxmox_enterprise_repositories.state }}"
+    validate_certs: false
+
+- name: Remove old kernels
+  ansible.builtin.apt:
+    name: 
+      - linux-image-amd64
+      - 'linux-image-6.1*'
+    state: absent
+
+- name: Update GRUB
+  ansible.builtin.command: update-grub
+  changed_when: true
 
 - name: Remove os-prober package
   ansible.builtin.apt:
     name: os-prober
     state: absent
-
-- name: Remove subscription notice
-  ansible.builtin.replace:
-    path: "{{ proxmox_js_path }}"
-    regexp: "data.status !== 'Active'"
-    replace: "false"
 
 - name: Enable required services
   ansible.builtin.systemd:
@@ -51,8 +83,5 @@
 - name: Wait for Proxmox Web to become available
   ansible.builtin.wait_for:
     port: 8006
-    delay: 10
+    delay: 30
     timeout: 300
-
-- name: Reboot after files installation
-  import_tasks: reboot.yml

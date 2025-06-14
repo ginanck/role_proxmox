@@ -1,189 +1,198 @@
 ---
 # defaults file for role_proxmox
+# Installation Guide
+# https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm
+# https://phoenixnap.com/kb/install-proxmox
 
 proxmox_state: "present"
 
-proxmox_network_interfaces:
-  primary_interface: "enp41s0"
-  interfaces:
-    - name: "vmbr0"
-      is_primary: true
-      comment: "route 65.109.108.128/26 via 65.109.108.129"
-      ipv4:
-        address: "65.109.108.167/26"
-        gateway: "65.109.108.129"
-        network: "65.109.108.128"
-        netmask: "255.255.255.192"
-      ipv6:
-        address: "2a01:4f9:3051:3ae9::2/64"
-        gateway: "fe80::1"
-    - name: "vmbr1"
-      vlan_aware: false
-    - name: "vmbr2"
-      vlan_aware: false
-    - name: "vmbr3"
-      vlan_aware: false
+proxmox_network_interfaces: []
+  # primary_interface: "enp41s0"
+  # interfaces:
+  #   - name: "vmbr0"
+  #     is_primary: true
+  #     comment: "route 65.109.108.128/26 via 65.109.108.129"
+  #     ipv4:
+  #       address: "65.109.108.167/26"
+  #       gateway: "65.109.108.129"
+  #       network: "65.109.108.128"
+  #       netmask: "255.255.255.192"
+  #     ipv6:
+  #       address: "2a01:4f9:3051:3ae9::2/64"
+  #       gateway: "fe80::1"
+  #   - name: "vmbr1"
+  #     vlan_aware: false
+  #   - name: "vmbr2"
+  #     vlan_aware: false
+  #   - name: "vmbr3"
+  #     vlan_aware: false
 
-proxmox_users:
-  - name: root
-    enabled: false
-    ssh_allowed: false
+proxmox_users: []
+#   - name: root
+#     enabled: false
+#     ssh_allowed: false
 
-  - name: pveadmin
-    email: pveadmin@example.com
-    comment: System Administrator User
-    password: "{{ pveadmin_pass }}"
-    groups: ['administrators']
-    enabled: true
-    ssh_allowed: true
+#   - name: pveadmin
+#     email: pveadmin@example.com
+#     comment: System Administrator User
+#     password: "{{ proxmox_pveadmin_pass }}"
+#     groups: ['administrators']
+#     enabled: true
+#     ssh_allowed: true
 
-  - name: terraform
-    email: terraform@example.com
-    comment: terraform User
-    groups: ['api_access']
-    enabled: true
-    ssh_allowed: false
-    tokens:
-      - name: terraform-token
-        privsep: true
-        permissions:
-          - path: /
-            roles: ['PVEAdmin']
+#   - name: terraform
+#     email: terraform@example.com
+#     comment: terraform User
+#     groups: ['api_access']
+#     enabled: true
+#     ssh_allowed: false
+#     tokens:
+#       - name: terraform-token
+#         privsep: true
+#         permissions:
+#           - path: /
+#             roles: ['PVEAdmin']
 
-  - name: packer
-    email: packer@example.com
-    comment: packer User
-    groups: ['api_access']
-    enabled: true
-    ssh_allowed: false
-    tokens:
-      - name: packer-token
-        privsep: true
-        permissions:
-          - path: /
-            roles: ['PVEAdmin']
+#   - name: packer
+#     email: packer@example.com
+#     comment: packer User
+#     groups: ['api_access']
+#     enabled: true
+#     ssh_allowed: false
+#     tokens:
+#       - name: packer-token
+#         privsep: true
+#         permissions:
+#           - path: /
+#             roles: ['PVEAdmin']
 
-  - name: gkorkmaz
-    email: gkorkmaz@example.com
-    comment: System Administrator User
-    password: "{{ pveadmin_pass }}"
-    permissions:
-      - path: '/'
-        roles: ['Administrator']
-    enabled: true
-    ssh_allowed: true
+#   - name: gkorkmaz
+#     email: gkorkmaz@example.com
+#     comment: System Administrator User
+#     password: "{{ proxmox_pveadmin_pass }}"
+#     permissions:
+#       - path: '/'
+#         roles: ['Administrator']
+#     enabled: true
+#     ssh_allowed: true
 
-proxmox_groups:
-  - name: administrators
-    comment: System Administrator Group
-    permissions:
-      - path: /
-        roles: ['Administrator']
-    state: present
+# proxmox_groups:
+#   - name: administrators
+#     comment: System Administrator Group
+#     permissions:
+#       - path: /
+#         roles: ['Administrator']
+#     state: present
 
-  - name: api_access
-    comment: Pool Admin
-    permissions:
-      - path: /
-        roles: ['PVEAdmin']
-    state: present
+#   - name: api_access
+#     comment: Pool Admin
+#     permissions:
+#       - path: /
+#         roles: ['PVEAdmin']
+#     state: present
 
-# Storage Variables
-proxmox_storage:
-  - name: data
-    path: /opt/data
-    content: ['rootdir', 'iso', 'images']
-    state: present
+proxmox_storage: []
+  # - name: data
+  #   path: /data
+  #   content: ['rootdir', 'iso', 'images']
+  #   state: present
 
 # Repository keys to add
+# url: https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg
 proxmox_apt_keys:
-  - url: "https://download.proxmox.com/debian/proxmox-release-bookworm.gpg"
-    state: present
+  url: "https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg"
+  state: present
 
-# Repositories to manage
 proxmox_repositories:
-  - repo: "deb [arch=amd64] http://download.proxmox.com/debian/pve bookworm pve-no-subscription"
-    filename: "proxmox-community"
-    state: present
-  - repo: "deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise"
-    filename: "pve-enterprise"
-    state: absent
+  repo: "deb [arch=amd64] http://download.proxmox.com/debian/pve bookworm pve-no-subscription"
+  filename: "pve-install-repo.list"
+  state: present
 
-# Package lists
+proxmox_enterprise_repositories:
+  repo: "deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise"
+  filename: "pve-enterprise"
+  state: absent
+
 proxmox_dependencies:
   - sudo
   - openssh-server
   - postfix
   - open-iscsi
+  - curl
+  - software-properties-common
+  - apt-transport-https
+  - ca-certificates
+  - gnupg2
 
 proxmox_packages:
-  - proxmox-ve
-  - pve-kernel-6.2
+  kernel: proxmox-default-kernel
+  proxmox:
+    - proxmox-ve
+    - postfix
+    - open-iscsi
+    - chrony
 
-# Services to enable
 proxmox_services:
   - pve-cluster
   - pvedaemon
   - pveproxy
   - pvestatd
 
-# File paths
-proxmox_js_path: "/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
+proxmox_iso_download: true
+proxmox_iso_path: "/data/template/iso"
+proxmox_iso_files: []
+  # # pfSense
+  # - name: "pfSense-CE-Plus-memstick-serial-23.09-RELEASE-amd64.img.gz"
+  #   url: "https://download.netgate.com/pfsense-ce-plus/amd64/pfSense-CE-Plus-memstick-serial-23.09-RELEASE-amd64.img.gz"
 
-proxmox_iso_path: "/opt/data/template/iso"
-proxmox_iso_files:
-  # pfSense
-  - name: "pfSense-CE-Plus-memstick-serial-23.09-RELEASE-amd64.img.gz"
-    url: "https://download.netgate.com/pfsense-ce-plus/amd64/pfSense-CE-Plus-memstick-serial-23.09-RELEASE-amd64.img.gz"
+  # # KDE Neon Linux
+  # - name: "kdeneon-user-20241222-0745.iso"
+  #   url: "https://files.kde.org/neon/images/user/20241222-0745/neon-user-20241222-0745.iso"
 
-  # KDE Neon Linux
-  - name: "kdeneon-user-20241222-0745.iso"
-    url: "https://files.kde.org/neon/images/user/20241222-0745/neon-user-20241222-0745.iso"
+  # # Alma Linux
+  # - name: "AlmaLinux-9.5-x86_64-minimal.iso"
+  #   url: "https://repo.almalinux.org/almalinux/9.5/isos/x86_64/AlmaLinux-9.5-x86_64-minimal.iso"
+  # - name: "AlmaLinux-8.10-x86_64-minimal.iso"
+  #   url: "https://repo.almalinux.org/almalinux/8.10/isos/x86_64/AlmaLinux-8.10-x86_64-minimal.iso"
 
-  # Alma Linux
-  - name: "AlmaLinux-9.5-x86_64-minimal.iso"
-    url: "https://repo.almalinux.org/almalinux/9.5/isos/x86_64/AlmaLinux-9.5-x86_64-minimal.iso"
-  - name: "AlmaLinux-8.10-x86_64-minimal.iso"
-    url: "https://repo.almalinux.org/almalinux/8.10/isos/x86_64/AlmaLinux-8.10-x86_64-minimal.iso"
+  # # Rocky Linux
+  # - name: "Rocky-9.5-x86_64-minimal.iso"
+  #   url: "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.5-x86_64-minimal.iso"
+  # - name: "Rocky-8.10-x86_64-minimal.iso"
+  #   url: "https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.10-x86_64-minimal.iso"
 
-  # Rocky Linux
-  - name: "Rocky-9.5-x86_64-minimal.iso"
-    url: "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.5-x86_64-minimal.iso"
-  - name: "Rocky-8.10-x86_64-minimal.iso"
-    url: "https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.10-x86_64-minimal.iso"
+  # # CentOS
+  # - name: "CentOS-Stream-10-latest-x86_64-boot.iso"
+  #   url: "https://mirror.nl.mirhosting.net/centos/10-stream/BaseOS/x86_64/iso/CentOS-Stream-10-latest-x86_64-boot.iso"
+  # - name: "CentOS-Stream-9-latest-x86_64-boot.iso"
+  #   url: "https://mirror.nl.mirhosting.net/centos/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-boot.iso"
 
-  # CentOS
-  - name: "CentOS-Stream-10-latest-x86_64-boot.iso"
-    url: "https://mirror.nl.mirhosting.net/centos/10-stream/BaseOS/x86_64/iso/CentOS-Stream-10-latest-x86_64-boot.iso"
-  - name: "CentOS-Stream-9-latest-x86_64-boot.iso"
-    url: "https://mirror.nl.mirhosting.net/centos/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-boot.iso"
+  # # Debian
+  # - name: "debian-10.13.0-amd64-DVD-1.iso"
+  #   url: "https://cdimage.debian.org/cdimage/archive/10.13.0/amd64/iso-dvd/debian-10.13.0-amd64-DVD-1.iso"
+  # - name: "debian-11.11.0-amd64-DVD-1.iso"
+  #   url: "https://cdimage.debian.org/cdimage/archive/11.11.0/amd64/iso-dvd/debian-11.11.0-amd64-DVD-1.iso"
+  # - name: "debian-12.8.0-amd64-DVD-1.iso"
+  #   url: "https://cdimage.debian.org/debian-cd/current/amd64/iso-dvd/debian-12.8.0-amd64-DVD-1.iso"
 
-  # Debian
-  - name: "debian-10.13.0-amd64-DVD-1.iso"
-    url: "https://cdimage.debian.org/cdimage/archive/10.13.0/amd64/iso-dvd/debian-10.13.0-amd64-DVD-1.iso"
-  - name: "debian-11.11.0-amd64-DVD-1.iso"
-    url: "https://cdimage.debian.org/cdimage/archive/11.11.0/amd64/iso-dvd/debian-11.11.0-amd64-DVD-1.iso"
-  - name: "debian-12.8.0-amd64-DVD-1.iso"
-    url: "https://cdimage.debian.org/debian-cd/current/amd64/iso-dvd/debian-12.8.0-amd64-DVD-1.iso"
+  # # Ubuntu
+  # - name: "ubuntu-18.04.3-server-amd64.iso"
+  #   url: "https://old-releases.ubuntu.com/releases/18.04.3/ubuntu-18.04.3-server-amd64.iso"
+  # - name: "ubuntu-18.04.5-server-amd64.iso"
+  #   url: "https://old-releases.ubuntu.com/releases/18.04.5/ubuntu-18.04.5-server-amd64.iso"
+  # - name: "ubuntu-18.04.6-live-server-amd64.iso"
+  #   url: "https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso"
+  # - name: "ubuntu-20.04.6-live-server-amd64.iso"
+  #   url: "https://releases.ubuntu.com/20.04/ubuntu-20.04.6-live-server-amd64.iso"
+  # - name: "ubuntu-22.04.5-live-server-amd64.iso"
+  #   url: "https://releases.ubuntu.com/22.04/ubuntu-22.04.5-live-server-amd64.iso"
+  # - name: "ubuntu-24.04.1-live-server-amd64.iso"
+  #   url: "https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso"
 
-  # Ubuntu
-  - name: "ubuntu-18.04.3-server-amd64.iso"
-    url: "https://old-releases.ubuntu.com/releases/18.04.3/ubuntu-18.04.3-server-amd64.iso"
-  - name: "ubuntu-18.04.5-server-amd64.iso"
-    url: "https://old-releases.ubuntu.com/releases/18.04.5/ubuntu-18.04.5-server-amd64.iso"
-  - name: "ubuntu-18.04.6-live-server-amd64.iso"
-    url: "https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso"
-  - name: "ubuntu-20.04.6-live-server-amd64.iso"
-    url: "https://releases.ubuntu.com/20.04/ubuntu-20.04.6-live-server-amd64.iso"
-  - name: "ubuntu-22.04.5-live-server-amd64.iso"
-    url: "https://releases.ubuntu.com/22.04/ubuntu-22.04.5-live-server-amd64.iso"
-  - name: "ubuntu-24.04.1-live-server-amd64.iso"
-    url: "https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso"
-
-  # Windows
-  - name: "Windows_Server_2012R2_Eval.iso"
-    url: "https://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO"
-  - name: "Windows_Server_2022_Eval.iso"
-    url: "https://software-static.download.prss.microsoft.com/sg/download/888969d5-f34g-4e03-ac9d-1f9786c66749/SERVER_EVAL_x64FRE_en-us.iso"
-  - name: "Win11_24H2_EnglishInternational_x64.iso"
-    url: "https://software-download.microsoft.com/download/sg/888969d5-f34g-4e03-ac9d-1f9786c69161/Win11_24H2_EnglishInternational_x64.iso"
+  # # Windows
+  # - name: "Windows_Server_2012R2_Eval.iso"
+  #   url: "https://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO"
+  # - name: "Windows_Server_2022_Eval.iso"
+  #   url: "https://software-static.download.prss.microsoft.com/sg/download/888969d5-f34g-4e03-ac9d-1f9786c66749/SERVER_EVAL_x64FRE_en-us.iso"
+  # - name: "Win11_24H2_EnglishInternational_x64.iso"
+  #   url: "https://software-download.microsoft.com/download/sg/888969d5-f34g-4e03-ac9d-1f9786c69161/Win11_24H2_EnglishInternational_x64.iso"
