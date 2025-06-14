@@ -33,17 +33,20 @@
   ansible.builtin.apt:
     name: "{{ proxmox_packages.kernel }}"
     state: present
+  register: kernel_install_result
 
 - name: Reboot after default kernel installation
   ansible.builtin.reboot:
     reboot_timeout: 3600
     msg: "Rebooting the system to apply the new kernel..."
+  when: kernel_install_result.changed
 
 - name: Wait for Proxmox Web to become available
   ansible.builtin.wait_for:
     port: 22
     delay: 30
     timeout: 300
+  when: kernel_install_result.changed
 
 - name: Install Proxmox VE packages
   ansible.builtin.apt:

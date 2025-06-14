@@ -27,6 +27,7 @@
     mode: '0644'
     remote_src: yes
   when: diff_result.rc == 1
+  register: network_config_changed
 
 - name: Clean up temporary file
   ansible.builtin.file:
@@ -39,16 +40,14 @@
     state: restarted
   async: 30
   poll: 0
+  when: network_config_changed.changed
 
 - name: wait for connection
   ansible.builtin.wait_for_connection:
     delay: 10
     timeout: 60
+  when: network_config_changed.changed
 
-- name: Clean up temporary file
-  ansible.builtin.file:
-    path: /tmp/new_interfaces
-    state: absent
-
-- name: Reboot after files network configurations
+- name: Reboot after network configurations
   import_tasks: reboot.yml
+  when: network_config_changed.changed
