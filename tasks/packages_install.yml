@@ -62,7 +62,7 @@
 
 - name: Remove old kernels
   ansible.builtin.apt:
-    name: 
+    name:
       - linux-image-amd64
       - 'linux-image-6.1*'
     state: absent

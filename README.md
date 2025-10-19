@@ -50,14 +50,14 @@ proxmox_storage:
       - iso                # ISO files
       - snippets           # Snippet files
       - vztmpl             # Container templates
-    
+
     # Type-specific options
     server: string         # NFS/CIFS: Server hostname/IP
     export: string         # NFS: Export path
     share: string          # CIFS: Share name
     username: string       # CIFS: Username
     password: string       # CIFS: Password
-    
+
     # Common options
     maxfiles: integer      # Optional: Maximum number of files
     prune_backups: string  # Optional: Backup retention policy
@@ -88,7 +88,7 @@ proxmox_networks:
 
 ```yaml
 proxmox_volumes:
-  - name: local-lvm        # Required: Volume name 
+  - name: local-lvm        # Required: Volume name
     type: lvmthin          # Required: Volume type (lvm, lvmthin, zfs)
     device: /dev/sda       # Required: Device path
     vgname: pve            # Required for LVM: Volume group name
@@ -117,7 +117,7 @@ proxmox_volumes:
         address: 10.0.0.1
         netmask: 255.255.255.0
         gateway: 10.0.0.254
-        ports: 
+        ports:
           - eno1
         autostart: true
 
@@ -127,7 +127,7 @@ proxmox_volumes:
           - eno2
           - eno3
         bond_mode: balance-alb
-        
+
     proxmox_volumes:
       - name: local-lvm
         type: lvmthin
@@ -135,7 +135,7 @@ proxmox_volumes:
         vgname: pve
         thinpool: data
         size: 1T
-        
+
       - name: backup-storage
         type: zfspool
         device: /dev/sdb
@@ -153,7 +153,7 @@ proxmox_users:
     firstname: "System"
     lastname: "Administrator"
     enable: true
-    groups: 
+    groups:
       - administrators
     permissions:
       - path: /
@@ -195,8 +195,7 @@ proxmox_storage:
 proxmox_iso_downloads:
   - name: "ubuntu-22.04-live-server-amd64.iso"                                      # Required: ISO filename
     url: "https://releases.ubuntu.com/22.04/ubuntu-22.04.3-live-server-amd64.iso"   # Required: Download URL
-    
+
   - name: "debian-12.1.0-amd64-netinst.iso"
     url: "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.1.0-amd64-netinst.iso"
 ```
-

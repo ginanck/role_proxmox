@@ -10,7 +10,7 @@
     state: "{{ item.state | default('present') }}"
     create_home: "{{ item.ssh_allowed | default(true) }}"
   loop: "{{ proxmox_users }}"
-  when: 
+  when:
     - item.name != 'root'
     - item.name != 'ansible'
   no_log: true

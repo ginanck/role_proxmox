@@ -49,10 +49,10 @@ def test_cli_connection():
     """Test basic CLI connection and Proxmox utilities"""
     try:
         from pve_base_utils import get_proxmox_data
-        
+
         print("🔗 Testing Proxmox CLI Connection...")
         print("-" * 50)
-        
+
         # Test if pveum is available
         try:
             result = subprocess.run(['pveum', '--version'], capture_output=True, text=True)
@@ -64,7 +64,7 @@ def test_cli_connection():
         except FileNotFoundError:
             print("❌ pveum not found in PATH")
             return False
-        
+
         # Test getting Proxmox data
         try:
             data = get_proxmox_data()
@@ -77,7 +77,7 @@ def test_cli_connection():
         except Exception as e:
             print(f"❌ Failed to get Proxmox data: {e}")
             return False
-            
+
     except ImportError as e:
         print(f"❌ Import Error: {e}")
         return False
@@ -86,7 +86,7 @@ def test_proxmoxer_connection():
     """Test proxmoxer API connection if available"""
     try:
         from pve_api_compatibility import CompatibleProxmoxConnection
-        
+
         # Configuration - Update these with your Proxmox details
         config = {
             'host': 'your-proxmox-host.com',
@@ -94,42 +94,42 @@ def test_proxmoxer_connection():
             'password': 'your-password',  # or use token auth
             'verify_ssl': False
         }
-        
+
         print("🔗 Testing Proxmox API Connection (proxmoxer)...")
         print(f"Host: {config['host']}")
         print(f"User: {config['user']}")
         print("-" * 50)
-        
+
         # Create connection
         conn = CompatibleProxmoxConnection(**config)
-        
+
         # Test connection
         if conn.test_connection():
             print("✅ Proxmoxer connection successful!")
         else:
             print("❌ Proxmoxer connection failed!")
             return None
-            
+
         # Get version information
         print("\n📊 Version Information:")
         version_info = conn.get_version_info()
         for key, value in version_info.items():
             print(f"  {key}: {value}")
-        
+
         # Test feature support
         print("\n🔧 Feature Support:")
         features_to_test = [
             'api_tokens', 'storage_encryption', 'vm_templates',
             'user_groups', 'sdn_support', 'backup_jobs'
         ]
-        
+
         for feature in features_to_test:
             supported = conn.api_compat.is_feature_supported(feature)
             status = "✅" if supported else "❌"
             print(f"  {status} {feature}")
-        
+
         return conn
-        
+
     except ImportError as e:
         print(f"❌ Proxmoxer Import Error: {e}")
         print("Make sure you have installed: pip install proxmoxer requests packaging")
@@ -142,7 +142,7 @@ def test_existing_modules():
     """Test existing CLI-based modules"""
     print("\n📦 Testing Existing Modules...")
     print("-" * 50)
-    
+
     # Test importing existing modules
     modules_to_test = [
         'pve_configure_users',
@@ -150,20 +150,20 @@ def test_existing_modules():
         'pve_configure_storage',
         'pve_get_tokens'
     ]
-    
+
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'library'))
-    
+
     for module_name in modules_to_test:
         try:
             module = __import__(module_name)
             print(f"✅ {module_name}: Import successful")
-            
+
             # Check if module has main function
             if hasattr(module, 'main'):
                 print(f"  ✅ Has main() function")
             else:
                 print(f"  ❌ Missing main() function")
-                
+
         except ImportError as e:
             print(f"❌ {module_name}: Import failed - {e}")
         except Exception as e:
@@ -173,10 +173,10 @@ def test_storage_utils():
     """Test storage utilities"""
     print("\n💾 Testing Storage Utilities...")
     print("-" * 50)
-    
+
     try:
         from pve_storage_utils import parse_storage_config, read_storage_config
-        
+
         # Test parsing sample storage config
         sample_config = """
 dir: local
@@ -188,13 +188,13 @@ dir: backups
 	content backup
 	prune-backups keep-daily=7,keep-weekly=4,keep-monthly=3
 """
-        
+
         storages = parse_storage_config(sample_config)
         print(f"✅ Parsed {len(storages)} storage configurations")
-        
+
         for storage in storages:
             print(f"  - {storage['name']} ({storage['type']}): {storage['path']}")
-            
+
     except ImportError as e:
         print(f"❌ Storage utils import error: {e}")
     except Exception as e:
@@ -204,21 +204,21 @@ def main():
     """Main testing function"""
     print("🚀 Proxmox Module Direct Testing")
     print("=" * 50)
-    
+
     # Test CLI connection first (existing modules)
     cli_success = test_cli_connection()
-    
+
     # Test existing modules
     test_existing_modules()
-    
+
     # Test storage utilities
     test_storage_utils()
-    
+
     # Test proxmoxer connection if available
     if cli_success:
         print("\n" + "=" * 50)
         conn = test_proxmoxer_connection()
-    
+
     print("\n✨ Testing completed!")
     print("=" * 50)
 
@@ -248,18 +248,18 @@ def test_user_module_import():
     try:
         import pve_configure_users
         print("✅ pve_configure_users imported successfully")
-        
+
         # Check for required classes/functions
         if hasattr(pve_configure_users, 'main'):
             print("  ✅ Has main() function")
-        
+
         if hasattr(pve_configure_users, 'UserManager'):
             print("  ✅ Has UserManager class")
         elif hasattr(pve_configure_users, 'ProxmoxUserManager'):
             print("  ✅ Has ProxmoxUserManager class")
         else:
             print("  ❌ Missing user manager class")
-            
+
         return True
     except ImportError as e:
         print(f"❌ Failed to import pve_configure_users: {e}")
@@ -270,16 +270,16 @@ def test_storage_module_import():
     try:
         import pve_configure_storage
         print("✅ pve_configure_storage imported successfully")
-        
+
         # Check for required functions
         if hasattr(pve_configure_storage, 'main'):
             print("  ✅ Has main() function")
-            
+
         if hasattr(pve_configure_storage, 'StorageManager'):
             print("  ✅ Has StorageManager class")
         else:
             print("  ❌ Missing storage manager class")
-            
+
         return True
     except ImportError as e:
         print(f"❌ Failed to import pve_configure_storage: {e}")
@@ -290,10 +290,10 @@ def test_group_module_import():
     try:
         import pve_configure_groups
         print("✅ pve_configure_groups imported successfully")
-        
+
         if hasattr(pve_configure_groups, 'main'):
             print("  ✅ Has main() function")
-            
+
         return True
     except ImportError as e:
         print(f"❌ Failed to import pve_configure_groups: {e}")
@@ -304,15 +304,15 @@ def test_token_module_import():
     try:
         import pve_get_tokens
         print("✅ pve_get_tokens imported successfully")
-        
+
         if hasattr(pve_get_tokens, 'main'):
             print("  ✅ Has main() function")
-            
+
         if hasattr(pve_get_tokens, 'TokenReader'):
             print("  ✅ Has TokenReader class")
         else:
             print("  ❌ Missing TokenReader class")
-            
+
         return True
     except ImportError as e:
         print(f"❌ Failed to import pve_get_tokens: {e}")
@@ -322,7 +322,7 @@ def test_module_parameters():
     """Test module parameter validation"""
     print("\n🧪 Testing Module Parameters...")
     print("-" * 50)
-    
+
     # Test user module parameters
     user_test_params = {
         'desired_users': [
@@ -342,7 +342,7 @@ def test_module_parameters():
             }
         ]
     }
-    
+
     # Test storage module parameters
     storage_test_params = {
         'desired_storage': [
@@ -355,10 +355,10 @@ def test_module_parameters():
             }
         ]
     }
-    
+
     print("✅ User module test parameters:")
     print(f"  Users to configure: {len(user_test_params['desired_users'])}")
-    
+
     print("✅ Storage module test parameters:")
     print(f"  Storages to configure: {len(storage_test_params['desired_storage'])}")
 
@@ -366,22 +366,22 @@ def main():
     """Main testing function"""
     print("🧪 Module-Specific Testing")
     print("=" * 50)
-    
+
     # Test all module imports
     user_ok = test_user_module_import()
     storage_ok = test_storage_module_import()
     group_ok = test_group_module_import()
     token_ok = test_token_module_import()
-    
+
     # Test parameters
     test_module_parameters()
-    
+
     print(f"\n📊 Import Results:")
     print(f"  Users: {'✅' if user_ok else '❌'}")
     print(f"  Storage: {'✅' if storage_ok else '❌'}")
     print(f"  Groups: {'✅' if group_ok else '❌'}")
     print(f"  Tokens: {'✅' if token_ok else '❌'}")
-    
+
     print("\n✨ Module testing completed!")
 
 if __name__ == "__main__":
@@ -472,15 +472,15 @@ cat > test_basic.yml << 'EOF'
         permissions:
           - path: "/"
             roles: ["PVEAuditor"]
-    
-    # Test storage configuration  
+
+    # Test storage configuration
     test_storage:
       - name: "ansible-test-storage"
         type: "dir"
         state: "present"
         path: "/var/lib/vz/ansible-test"
         content: ["backup", "iso"]
-        
+
   tasks:
     - name: Test user management module
       pve_configure_users:
@@ -556,7 +556,7 @@ cat > test_comprehensive.yml << 'EOF'
         permissions:
           - path: "/"
             roles: ["PVEAuditor"]
-      - name: "test-user-2" 
+      - name: "test-user-2"
         password: "pass456"
         email: "user2@test.com"
         comment: "Test user 2"
@@ -704,7 +704,7 @@ cat > test_debug.yml << 'EOF'
       pve_configure_users:
         desired_users: "{{ debug_user }}"
       register: debug_user_result
-      
+
     - name: Show complete user module output
       debug:
         var: debug_user_result
@@ -807,7 +807,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'module_utils')
 def setup_cli_environment():
     """Setup CLI environment for interactive testing"""
     from pve_base_utils import get_proxmox_data
-    
+
     print("Setting up Proxmox CLI environment...")
     try:
         data = get_proxmox_data()
@@ -825,7 +825,7 @@ def setup_proxmoxer_connection():
     """Setup and return a Proxmox connection for interactive use"""
     try:
         from pve_api_compatibility import CompatibleProxmoxConnection
-        
+
         # Configuration
         config = {
             'host': 'your-proxmox-host.com',
@@ -833,10 +833,10 @@ def setup_proxmoxer_connection():
             'password': 'your-password',
             'verify_ssl': False
         }
-        
+
         print("Setting up Proxmoxer connection...")
         conn = CompatibleProxmoxConnection(**config)
-        
+
         if conn.test_connection():
             print("✅ Proxmoxer connected successfully!")
             return conn
@@ -863,7 +863,7 @@ def explore_proxmoxer_api(conn):
     if not conn:
         print("❌ No proxmoxer connection available")
         return
-        
+
     print("\n🔍 Available Proxmoxer API endpoints:")
     print("conn.proxmox.access.users.get()  # Get users")
     print("conn.proxmox.storage.get()       # Get storage")
@@ -875,13 +875,13 @@ def explore_proxmoxer_api(conn):
 def debug_user_operations(conn, userid="interactive-test@pve"):
     """Debug user operations step by step"""
     print(f"\n🧪 Debugging user operations for: {userid}")
-    
+
     try:
         # Step 1: Get all users
         print("\n1️⃣ Getting all users...")
         users = conn.proxmox.access.users.get()
         print(f"Found {len(users)} users")
-        
+
         # Step 2: Check if test user exists
         print(f"\n2️⃣ Checking if {userid} exists...")
         test_user = None
@@ -889,12 +889,12 @@ def debug_user_operations(conn, userid="interactive-test@pve"):
             if user.get('userid') == userid:
                 test_user = user
                 break
-        
+
         if test_user:
             print(f"✅ User exists: {test_user}")
         else:
             print("❌ User doesn't exist")
-        
+
         # Step 3: Try to create user
         print(f"\n3️⃣ Attempting to create {userid}...")
         try:
@@ -910,7 +910,7 @@ def debug_user_operations(conn, userid="interactive-test@pve"):
                 print("⚠️ User already exists, skipping creation")
         except Exception as e:
             print(f"❌ Creation failed: {e}")
-            
+
         # Step 4: Get updated user list
         print(f"\n4️⃣ Getting updated user information...")
         updated_users = conn.proxmox.access.users.get()
@@ -919,13 +919,13 @@ def debug_user_operations(conn, userid="interactive-test@pve"):
             if user.get('userid') == userid:
                 updated_test_user = user
                 break
-        
+
         if updated_test_user:
             print("✅ Updated user info:")
             pprint(updated_test_user)
-        
+
         return updated_test_user
-        
+
     except Exception as e:
         print(f"❌ Debug error: {e}")
         return None
@@ -936,32 +936,32 @@ conn = None
 def main():
     """Main function for interactive setup"""
     global conn
-    
+
     print("🚀 Interactive Proxmox Development Session")
     print("=" * 50)
-    
+
     # Setup connection
     conn = setup_connection()
-    
+
     if conn:
         # Show version info
         version_info = conn.get_version_info()
         print(f"\n📊 Version Info: {version_info}")
-        
+
         # Show available functions
         explore_api(conn)
-        
+
         print(f"\n🎯 Connection is ready!")
         print("Use 'conn' variable for API calls")
         print("Use debug_user_operations(conn) for step-by-step debugging")
         print("Use pprint() for better output formatting")
-    
+
     return conn
 
 if __name__ == "__main__":
     # Run setup and start interactive session
     conn = main()
-    
+
     # For Python -i mode, these will be available
     print(f"\n💡 Starting interactive mode...")
     print("Available variables: conn, debug_user_operations, explore_api")
@@ -1048,21 +1048,21 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'module_utils')
 def setup_debug_connection():
     """Setup connection with debug logging"""
     from pve_api_compatibility import CompatibleProxmoxConnection
-    
+
     # Enable proxmoxer debugging
     import proxmoxer.core
     proxmoxer.core.logger.setLevel(logging.DEBUG)
-    
+
     config = {
         'host': 'your-proxmox-host.com',
         'user': 'root@pam',
         'password': 'your-password',
         'verify_ssl': False
     }
-    
+
     logger.info("Setting up debug connection...")
     conn = CompatibleProxmoxConnection(**config)
-    
+
     if conn.test_connection():
         logger.info("✅ Debug connection successful!")
         return conn
@@ -1073,20 +1073,20 @@ def setup_debug_connection():
 def trace_api_call(conn, endpoint, method='get', **kwargs):
     """Trace a specific API call with full logging"""
     logger.info(f"🔍 Tracing API call: {method.upper()} {endpoint}")
-    
+
     try:
         # Navigate to endpoint
         api_obj = conn.proxmox
         for part in endpoint.split('.'):
             api_obj = getattr(api_obj, part)
-        
+
         # Make call
         method_func = getattr(api_obj, method)
         result = method_func(**kwargs)
-        
+
         logger.info(f"✅ API call successful")
         logger.debug(f"Result: {json.dumps(result, indent=2, default=str)}")
-        
+
         return result
     except Exception as e:
         logger.error(f"❌ API call failed: {e}")
@@ -1095,9 +1095,9 @@ def trace_api_call(conn, endpoint, method='get', **kwargs):
 if __name__ == "__main__":
     print("🔬 Advanced Debug Session")
     print("Check /tmp/proxmox_debug.log for detailed logs")
-    
+
     conn = setup_debug_connection()
-    
+
     if conn:
         print("Debug connection ready!")
         print("Use trace_api_call(conn, 'access.users') to trace calls")
@@ -1209,10 +1209,10 @@ from proxmoxer.core import ProxmoxAPIException
 try:
     api = proxmoxer.ProxmoxAPI('host', user='user', password='pass', verify_ssl=False)
     print("Basic connection works")
-    
+
     version = api.version.get()
     print(f"Version: {version}")
-    
+
 except ProxmoxAPIException as e:
     print(f"API Error: {e}")
     print(f"Status: {e.status_code}")
@@ -1266,7 +1266,7 @@ python3 tests/python_cli/test_cli_modules.py
 # Test specific modules
 python3 tests/python_cli/test_user_module.py
 
-# Ansible Module Testing  
+# Ansible Module Testing
 ansible-playbook tests/ansible/test_basic.yml -vvv
 
 # Interactive Debugging

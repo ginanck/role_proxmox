@@ -6,6 +6,6 @@
     system: yes
     state: "absent"
   loop: "{{ proxmox_users }}"
-  when: 
+  when:
     - item.name != 'root'
     - item.name != 'ansible'
