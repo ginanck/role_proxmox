@@ -1,0 +1,115 @@
+---
+name: molecule
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the pipeline on'
+        required: false
+        default: 'master'
+        type: string
+      molecule_scenario:
+        description: 'Molecule scenario to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - default
+          - ubuntu2404
+      python_version:
+        description: 'Python version to use'
+        required: false
+        default: '3.9.23'
+        type: choice
+        options:
+          - '3.9.23'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+      debug_mode:
+        description: 'Enable debug mode for verbose output'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Set up Python ${{ github.event.inputs.python_version || '3.9.23' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ github.event.inputs.python_version || '3.9.23' }}
+
+      - name: Download linter configurations
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ginanck/shared-pre-commit-hooks/master/config/ansible-lint.yml -o ansible-lint.yml
+          curl -fsSL https://raw.githubusercontent.com/ginanck/shared-pre-commit-hooks/master/config/yamllint.yml -o yamllint.yml
+          curl -fsSL https://raw.githubusercontent.com/ginanck/shared-pre-commit-hooks/master/config/flake8.conf -o flake8.conf
+
+      - name: Install linter dependencies
+        run: |
+          pip3 install ansible-lint yamllint flake8
+
+      - name: Run ansible-lint
+        run: |
+          ansible-lint -c ansible-lint.yml .
+
+      - name: Run yamllint
+        run: |
+          yamllint -c yamllint.yml .
+
+      - name: Run flake8
+        run: |
+          flake8 --config=flake8.conf .
+
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ${{ (github.event.inputs.molecule_scenario || 'all') == 'all' && fromJson('["default", "ubuntu2404"]') || fromJson(format('["{0}"]', github.event.inputs.molecule_scenario || 'all')) }}
+    env:
+      DOCKER_HOST: 'unix:///var/run/docker.sock'
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Set up Python ${{ github.event.inputs.python_version || '3.9.23' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ github.event.inputs.python_version || '3.9.23' }}
+
+      - name: Install minimal test dependencies
+        run: |
+          pip3 install ansible molecule molecule-docker docker
+
+      - name: Run Molecule tests for ${{ matrix.scenario }} scenario
+        run: |
+          ansible-galaxy collection install community.docker:4.8.1 --force
+
+          if [ "${{ github.event.inputs.debug_mode }}" == "true" ]; then
+            molecule test -s ${{ matrix.scenario }} --debug
+          else
+            molecule test -s ${{ matrix.scenario }}
+          fi
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
