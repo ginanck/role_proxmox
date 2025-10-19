@@ -23,12 +23,21 @@ repos:
   - repo: local
     hooks:
       # ==================== SECURITY HOOKS ====================
-      - id: gitleaks
-        name: gitleaks
+      - id: gitleaks-commit-history
+        name: gitleaks-commit-history
         description: Detects and prevents secrets like passwords, API keys, and tokens from being committed to the repository
         entry: gitleaks
         language: system
-        args: ["detect", "--source", ".", "--verbose"]
+        args: ["git", ".", "--verbose"]
+        pass_filenames: false
+        always_run: true
+
+      - id: gitleaks-current-directory
+        name: gitleaks-current-directory
+        description: Detects and prevents secrets like passwords, API keys, and tokens from being committed to the repository
+        entry: gitleaks
+        language: system
+        args: ["dir", ".", "--verbose"]
         pass_filenames: false
         always_run: true
 
