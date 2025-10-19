@@ -48,8 +48,8 @@ repos:
         language: system
         args: [-c, .config/ansible-lint.yml, -q]
         files: \.(yaml|yml)$
-        exclude: ^(molecule/.*|\.github/.*|requirements\.yml$|collections/.*|roles/.*|todo/.*|ansible/.*|\.pre-commit-config.*\.yaml$|\.pre-commit-hooks\.yaml$)
-      
+        exclude: ^(\.github/.*|molecule/.*|roles/.*|collections/.*|todo/.*|ansible/.*|\.ansible/.*|tests/.*|requirements\.yml$|\.pre-commit-*.*\.yaml$|\.travis\.yml$)
+
       # YAML linting
       - id: yamllint
         name: yamllint
@@ -58,7 +58,7 @@ repos:
         language: system
         args: [-c, .config/yamllint.yml]
         files: \.(yaml|yml)$
-        exclude: ^(\.pre-commit-config.*\.yaml$|\.pre-commit-hooks\.yaml$)
+        exclude: ^(\.github/.*|molecule/.*|roles/.*|collections/.*|todo/.*|ansible/.*|\.ansible/.*|tests/.*|requirements\.yml$|\.pre-commit-*.*\.yaml$|\.travis\.yml$)
       
       # ==================== PYTHON HOOKS ====================
       - id: flake8
@@ -108,10 +108,11 @@ repos:
     hooks:
       - id: trailing-whitespace
         name: trailing-whitespace
+        exclude: ^(\.github/.*|roles/.*|collections/.*|todo/.*|ansible/.*|\.ansible/.*|tests/.*|requirements\.yml$|\.pre-commit-*.*\.yaml$|\.travis\.yml$)
         description: Removes trailing whitespace from the end of lines
-        exclude: ^(\.pre-commit-config.*\.yaml$|\.pre-commit-hooks\.yaml$)
       - id: end-of-file-fixer
         name: end-of-file-fixer
+        exclude: ^(\.github/.*|roles/.*|collections/.*|todo/.*|ansible/.*|\.ansible/.*|tests/.*|requirements\.yml$|\.pre-commit-*.*\.yaml$|\.travis\.yml$)
         description: Ensures files end with a single newline character
       - id: check-added-large-files
         name: check-added-large-files
@@ -131,5 +132,6 @@ repos:
         description: Ensures files with shebangs are marked as executable
       - id: mixed-line-ending
         name: mixed-line-ending
+        exclude: ^(\.github/.*|roles/.*|collections/.*|todo/.*|ansible/.*|\.ansible/.*|tests/.*|requirements\.yml$|\.pre-commit-*.*\.yaml$|\.travis\.yml$)
         description: Replaces mixed line endings with Unix-style (LF) line endings
         args: ["--fix=lf"]

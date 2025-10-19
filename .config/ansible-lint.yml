@@ -1,0 +1,44 @@
+# Ansible Lint Configuration
+---
+# List of additional rules directories to search for rules
+rulesdir: []
+# List of files to skip
+skip_list:
+  - yaml[line-length] # Allow longer lines for readability
+  - name[casing] # Allow various naming conventions
+  - schema[playbook] # Skip become_method FQCN validation
+  - var-naming # Allow flexible variable naming patterns
+  - experimental
+  - role-name
+  - yaml
+  - '204'
+  - schema
+  - meta-incorrect
+  - no-changed-when
+  - internal-error
+  - risky-shell-pipe
+  - command-instead-of-shell
+
+# Exclude specific paths
+exclude_paths:
+  - .cache/
+  - .github/
+  - .config/
+  - molecule/
+  - .pre-commit-config.yaml
+  - .pre-commit-config*.yaml
+  - .pre-commit-hooks.yaml
+  - .travis.yml
+  - collections/
+  - fact_cache/
+  - tmp/
+  - vault/
+  - files/helm/*.yml
+  - files/helm/*.yaml
+  - roles/
+  - todo/
+  - tests/
+
+# Warn on risky file permissions
+warn_list:
+  - risky-file-permissions
