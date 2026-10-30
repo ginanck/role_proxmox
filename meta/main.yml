@@ -1,4 +1,6 @@
 galaxy_info:
+  role_name: role_proxmox
+  namespace: gkorkmaz
   author: Gorkem Inanc Korkmaz <gorkeminanckorkmaz@gmail.com>
   description: role_proxmox
   company: GK DevOps Toolkit

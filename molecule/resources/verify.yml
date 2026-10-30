@@ -1,0 +1,12 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    # Extend with role-specific assertions as the role matures.
+    - name: test_ac1_system_is_manageable
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['os_family'] in ['RedHat', 'Debian']
+        fail_msg: "the test host must be a supported Linux distribution"
