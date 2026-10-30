@@ -26,12 +26,9 @@ on:
       python_version:
         description: 'Python version to use'
         required: false
-        default: '3.9.23'
+        default: '3.12'
         type: choice
         options:
-          - '3.9.23'
-          - '3.10'
-          - '3.11'
           - '3.12'
       debug_mode:
         description: 'Enable debug mode for verbose output'
@@ -49,10 +46,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch || github.ref }}
 
-      - name: Set up Python ${{ github.event.inputs.python_version || '3.9.23' }}
+      - name: Set up Python ${{ github.event.inputs.python_version || '3.12' }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ github.event.inputs.python_version || '3.9.23' }}
+          python-version: ${{ github.event.inputs.python_version || '3.12' }}
 
       - name: Download linter configurations
         run: |
@@ -62,7 +59,7 @@ jobs:
 
       - name: Install linter dependencies
         run: |
-          pip3 install ansible-lint yamllint flake8
+          pip3 install "ansible-core==2.21.5" "ansible-lint==26.1.0" "yamllint==1.37.1" "flake8==7.1.1"
 
       - name: Run ansible-lint
         run: |
@@ -83,7 +80,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: ${{ (github.event.inputs.molecule_scenario || 'all') == 'all' && fromJson('["default", "ubuntu2404"]') || fromJson(format('["{0}"]', github.event.inputs.molecule_scenario || 'all')) }}
+        scenario: ${{ (github.event.inputs.molecule_scenario || 'all') == 'all' && fromJson('["default", "rockylinux-9", "rockylinux-10"]') || fromJson(format('["{0}"]', github.event.inputs.molecule_scenario || 'all')) }}
     env:
       DOCKER_HOST: 'unix:///var/run/docker.sock'
     steps:
@@ -92,19 +89,28 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch || github.ref }}
 
-      - name: Set up Python ${{ github.event.inputs.python_version || '3.9.23' }}
+      - name: Set up Python ${{ github.event.inputs.python_version || '3.12' }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ github.event.inputs.python_version || '3.9.23' }}
+          python-version: ${{ github.event.inputs.python_version || '3.12' }}
 
       - name: Install minimal test dependencies
         run: |
-          pip3 install ansible molecule molecule-docker docker
+          pip3 install "ansible-core==2.21.5" "molecule==26.10.0" "molecule-plugins[docker]==26.10.12" "ansible-compat==26.10.0" "docker==7.2.0"
+
+      - name: Detect molecule scenarios
+        id: detect
+        run: |
+          if [ -f "molecule/${{ matrix.scenario }}/molecule.yml" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No molecule scenario '${{ matrix.scenario }}' in this role; skipping."
+          fi
 
       - name: Run Molecule tests for ${{ matrix.scenario }} scenario
+        if: steps.detect.outputs.exists == 'true'
         run: |
-          ansible-galaxy collection install community.docker:4.8.1 --force
-
           if [ "${{ github.event.inputs.debug_mode }}" == "true" ]; then
             molecule test -s ${{ matrix.scenario }} --debug
           else
